@@ -167,6 +167,21 @@ int packages_send(int fd, uint8_t id, char *data, int len)
 }
 
 /**************************************************************************************
+ * * FunctionName   : uninstall_protoid()
+ * * Description    : 解初始化ID
+ * * EntryParameter : fd,指向应答套接字（串口）
+ * * ReturnValue    : None
+ * ************************************************************************************/
+static void uninstall_protoid(int fd)
+{
+	struct id_proto *proto = id_list;
+
+	while (unlikely(proto != NULL)) {
+		if(proto->deinit) proto->deinit(fd);
+	}
+}
+
+/**************************************************************************************
  * * FunctionName   : handle_INT()
  * * Description    : 信号处理函数
  * * EntryParameter : signum，信号值
@@ -175,6 +190,7 @@ int packages_send(int fd, uint8_t id, char *data, int len)
 static void handle_INT(int signum)
 {
 	syslog(LOG_NOTICE, "Terminated by signal %d", signum);
+	uninstall_protoid(m_fd);
 	device_deinit(m_fd);
 	closelog();
 	exit(1);

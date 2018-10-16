@@ -30,5 +30,5 @@ message Gps {
 // can struct
 message Can {
 	required uint32 id = 1;
-	optional bytes data = 2;
+	required bytes data = 2;
 }

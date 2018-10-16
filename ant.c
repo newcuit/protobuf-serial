@@ -103,4 +103,4 @@ static int ant_handler(int fd, char *data, int len)
 }
 
 // 注册ID
-register_id(ANT_ID, NULL, ant_handler);
+register_id(ANT_ID, NULL, NULL, ant_handler);
