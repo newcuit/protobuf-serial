@@ -5,7 +5,7 @@
 * Description    : 定义ID列表
 **************************************************************************************/
 #define ANT_ID                                1 // 天线检测ID
-#define ELEC_ID                               2 // 电子地平线ID
+#define EMAPS_ID                              2 // 电子地平线ID
 #define ANT_CHG_ID                            3 // 天线切换ID
 #define SUSPEND_ID                            4 // 休眠ID
 
