@@ -198,6 +198,21 @@ static void setup_signals()
 }
 
 /**************************************************************************************
+ * * FunctionName   : setup_protoid()
+ * * Description    : 初始化ID
+ * * EntryParameter : fd,指向应答套接字（串口）
+ * * ReturnValue    : None
+ * ************************************************************************************/
+static void setup_protoid(int fd)
+{
+	struct id_proto *proto = id_list;
+
+	while (unlikely(proto != NULL)) {
+		if(proto->init) proto->init(fd);
+	}
+}
+
+/**************************************************************************************
  * * FunctionName   : usage()
  * * Description    : 帮助文档
  * * EntryParameter : app,应用名字
@@ -272,7 +287,10 @@ int main(int argc, char *argv[])
 	fd = device_init(device, baud);
 	if (fd < 0) return -1;
 
-	// 7.任务处理
+	// 7.初始化各ID
+	setup_protoid(fd);
+
+	// 8.任务处理
 	m_fd = fd;
 	for (;;) {
 		FD_ZERO(&readfds);
@@ -289,7 +307,7 @@ int main(int argc, char *argv[])
 		// 处理数据
 		do_packages(fd, buffer, len);
 	}
-	// 8.关闭
+	// 9.关闭
 	close(fd);
 	closelog();
 

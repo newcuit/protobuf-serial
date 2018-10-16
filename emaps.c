@@ -47,4 +47,4 @@ static int emaps_handler(int fd, char *data, int len)
 }
 
 // 注册ID
-register_id(EMAPS_ID, emaps_handler);
+register_id(EMAPS_ID, NULL, emaps_handler);

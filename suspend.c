@@ -36,4 +36,4 @@ static int suspend_handler(int fd, char *data, int len)
 }
 
 // 注册ID
-register_id(SUSPEND_ID, suspend_handler);
+register_id(SUSPEND_ID, NULL, suspend_handler);

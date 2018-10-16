@@ -27,6 +27,7 @@
 /**************************************************************************************
  * * Description    : 定义协议处理回调
  * **************************************************************************************/
+typedef int (*init_handler)(int);
 typedef int (*handler_t)(int, char *,int);
 
 /**************************************************************************************
@@ -35,6 +36,7 @@ typedef int (*handler_t)(int, char *,int);
 struct id_proto {
 	uint8_t id;
 	handler_t handler;
+	init_handler init;
 	struct id_proto *next;
 };
 
@@ -321,9 +323,10 @@ int packages_send(int fd, uint8_t id, char *data, int len);
 /**************************************************************************************
 * Description    : 定义协议注册函数
 **************************************************************************************/
-#define register_id(ID, HANDLER) \
+#define register_id(ID, INIT, HANDLER) \
 static struct id_proto id_##ID##_##HANDLER= { \
 	.id = ID, \
+	.init = INIT, \
 	.handler = HANDLER,  \
 }; \
 static void  __attribute__((constructor)) __reg_proto_##ID(void) \

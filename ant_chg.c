@@ -141,4 +141,4 @@ static int antchg_handler(int fd, char *data, int len)
 }
 
 // 注册ID
-register_id(ANT_CHG_ID, antchg_handler);
+register_id(ANT_CHG_ID, NULL, antchg_handler);
