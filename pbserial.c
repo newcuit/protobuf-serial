@@ -12,7 +12,7 @@
 #include "serial.h"
 #include "pbserial.h"
 
-#define LOG_TAG                         "minfo" // 日志名字
+#define LOG_TAG                         "pbserial" // 日志名字
 #define BUFFER_FIFO_SIZE                2048    // 缓存暂时没有收全的protobuf数据包
 
 static int debug = 0;                           // 调试开关
@@ -27,7 +27,7 @@ static struct id_proto *id_list = NULL;         // 指向所有id列表
  * **************************************************************************************/
 static uint8_t chksum_xor(uint8_t *data, int32_t len)
 {
-    int32_t i = 1;
+	int32_t i = 1;
 	uint8_t csum = data[0];
 
 	for (i = 1; i < len; i++) {
@@ -174,7 +174,7 @@ int packages_send(int fd, uint8_t id, char *data, int len)
  * ************************************************************************************/
 static void handle_INT(int signum)
 {
-    syslog(LOG_NOTICE, "Terminated by signal %d", signum);
+	syslog(LOG_NOTICE, "Terminated by signal %d", signum);
 	device_deinit(m_fd);
 	closelog();
 	exit(1);
