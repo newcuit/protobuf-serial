@@ -4,7 +4,7 @@ EMAP_DIR := emap
 GPS_DIR := gps
 
 CPPFLAGS += -O3 -g -I./ -I../  -Iinclude
-LD_FLAGS += -Wl,--no-as-needed -std=c++11 -L./ -L./lib -ladasisHP -lpthread -lm -lstdc++
+LD_FLAGS += -Wl,--no-as-needed -std=c++11 -L./lib -ladasisHP -lpthread -lm -lstdc++
 
 SRC_FILES = ${wildcard *.c}
 EMAP_FILES = ${wildcard $(EMAP_DIR)/*.c}
@@ -13,7 +13,7 @@ PROTO_FILES = $(PROTO_DIR)/protobuf-c.c $(PROTO_DIR)/data.pb-c.c
 
 all: $(TARGETS)
 
-pbserial: protobuf oemap onmea
+pbserial: protobuf onmea oemap
 	-@echo ""
 	-@echo "Compile pbserial"
 	$(CC) -c $(CPPFLAGS) $(SRC_FILES)

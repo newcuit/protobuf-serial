@@ -247,12 +247,12 @@ static void setup_signals()
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGQUIT, &sa, NULL);
 
-	sa.sa_flags = 0;
-	sa.sa_handler = pb_backtrace;
-	sigaction(SIGBUS, &sa, NULL);
-	sigaction(SIGABRT, &sa, NULL);
-	sigaction(SIGSEGV, &sa, NULL);
-	sigaction(SIGFPE, &sa, NULL);
+	//sa.sa_flags = 0;
+	//sa.sa_handler = pb_backtrace;
+	//sigaction(SIGBUS, &sa, NULL);
+	//sigaction(SIGABRT, &sa, NULL);
+	//sigaction(SIGSEGV, &sa, NULL);
+	//sigaction(SIGFPE, &sa, NULL);
 }
 
 /**************************************************************************************
