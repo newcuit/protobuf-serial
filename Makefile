@@ -3,10 +3,8 @@ PROTO_DIR := protobuf-c
 EMAP_DIR := emap
 GPS_DIR := gps
 
-CPPFLAGS += -Wl,--hash-style=sysv -I./ -I../  -Iinclude
-LD_FLAGS += -L./ -L./lib -Wl,--hash-style=sysv -ladasisHP -lpthread -lm -lstdc++
-#CC := arm-oe-linux-gnueabi-gcc
-#-Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
+CPPFLAGS += -O3 -g -I./ -I../  -Iinclude
+LD_FLAGS += -Wl,--no-as-needed -std=c++11 -L./ -L./lib -ladasisHP -lpthread -lm -lstdc++
 
 SRC_FILES = ${wildcard *.c}
 EMAP_FILES = ${wildcard $(EMAP_DIR)/*.c}
@@ -21,7 +19,7 @@ pbserial: protobuf oemap onmea
 	$(CC) -c $(CPPFLAGS) $(SRC_FILES)
 	-@echo ""
 	-@echo "Link pbserial"
-	$(CC) *.o $(LD_FLAGS) -o $@
+	$(CC) *.o  $(LD_FLAGS) -o $@
 
 oemap:
 	-@echo ""

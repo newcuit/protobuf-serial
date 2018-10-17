@@ -127,7 +127,7 @@ static int do_packages(int fd, char *data, int len)
 		// 数据校验可靠性检测， 错误就重新尝试
 		if(tdata->csum == chksum_xor((uint8_t *)tdata->data, length)) {
 			DEBUG("recv %d length:%d\n", id, length)
-			iddata_send(fd, id, tdata->data, length);
+			iddata_send(fd, id, (char *)tdata->data, length);
 		} else {
 			syslog(LOG_ERR,"recv data(%d) chksum fail !!!\n", id, length);
 		}
@@ -252,8 +252,6 @@ static void setup_signals()
 	sigaction(SIGBUS, &sa, NULL);
 	sigaction(SIGABRT, &sa, NULL);
 	sigaction(SIGSEGV, &sa, NULL);
-
-	sa.sa_handler = SIG_IGN;
 	sigaction(SIGFPE, &sa, NULL);
 }
 

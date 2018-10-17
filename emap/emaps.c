@@ -43,31 +43,57 @@ static int get_gpsinfo(av2hp_gpsInfo *info, char *data, int len)
 	struct gpsinfo gps = {0};
 
 	gpsbuffer_to_gpsinfo(&gps, data, len);
-
+	
+	// 1.设置GPS数据状态
 	info->m_valid              = gps.rmc.valid;
+
+	// 2.设置获取时间
 	info->m_dateTime.m_hours   = gps.rmc.time.hours;
 	info->m_dateTime.m_minutes = gps.rmc.time.minutes;
 	info->m_dateTime.m_seconds = gps.rmc.time.seconds;
 	info->m_dateTime.m_year    = gps.rmc.date.year+2000;
 	info->m_dateTime.m_month   = gps.rmc.date.month;
 	info->m_dateTime.m_day     = gps.rmc.date.day;
+
+	// 3.设置时间戳
 	info->m_timestamp          = 0;
+
+	// 4.设置位置信息
 	info->m_pos.m_kind         = av2hp_coordinate_WGS84;
 	info->m_pos.m_lon          = minmea_tocoord(&gps.rmc.longitude);
 	info->m_pos.m_lat          = minmea_tocoord(&gps.rmc.latitude);
 	info->m_pos.m_alt          = minmea_tofloat(&gps.gga.altitude);
+
+	// 5.设置GPS方向（0-360）
+	info->m_orient             = minmea_tofloat(&gps.rmc.course);
+
+	// 6.设置GPS速度
 	info->m_speed.m_unit       = av2hp_speedUnit_ms;
 	info->m_speed.m_value      = minmea_tofloat(&gps.vtg.speed_kph)/3.6;
-	info->m_orient             = minmea_tofloat(&gps.rmc.course);
+
+	// 7.GPS信号质量
+	info->m_gpsQuality = 1;
+
+	// 8.设置精度
 	info->m_hdop               = minmea_tofloat(&gps.gsa.hdop);
 	info->m_pdop               = minmea_tofloat(&gps.gsa.pdop);
 	info->m_vdop               = minmea_tofloat(&gps.gsa.vdop);
 
-	info->m_gpsQuality = 1;
+	// 9.设置当前卫星个数
 	info->m_satInViewNum       = gps.gsv[0].total_sats;
+
+	// 10.含有信噪比的卫星数量
 	info->m_satNum             = 0;
 	for (i = 0; i < 12; i++){
 		if (gps.gsa.sats[i] > 0) info->m_satNum++;
+	}
+
+	// 11.原始卫星数据
+	for(i = 0; i < 20; i++) {
+		info->m_satellites[i].satId = gps.gsv[i/4].sats[i%4].nr;
+		info->m_satellites[i].elevation = gps.gsv[i/4].sats[i%4].elevation;
+		info->m_satellites[i].azimuth = gps.gsv[i/4].sats[i%4].azimuth;
+		info->m_satellites[i].SNRatio = gps.gsv[i/4].sats[i%4].snr;
 	}
 
 	return 0;
@@ -165,7 +191,7 @@ static int handle_emaps_data(ProtobufCBinaryData *data, int n_data)
 {
 	int  i;
 	Gps *gps = NULL;
-	av2hp_gpsInfo gpsinfo = {0};
+	av2hp_gpsInfo gpsinfo = {0x31};
 
 	for (i = 0; i < n_data; i++) {
 		gps = gps__unpack(NULL, data[i].len, data[i].data);
@@ -173,6 +199,7 @@ static int handle_emaps_data(ProtobufCBinaryData *data, int n_data)
 
 		DEBUG("GPS(%d):%s\n",gps->nmea.len,gps->nmea.data);
 		get_gpsinfo(&gpsinfo, gps->nmea.data, gps->nmea.len);
+
 		Av2HP_setGpsInfo(&gpsinfo);
 		gps__free_unpacked(gps, NULL);
 	}
