@@ -9,11 +9,13 @@
 #include <termios.h>
 #include <signal.h>
 #include <syslog.h>
+#include <execinfo.h>
 #include "serial.h"
 #include "pbserial.h"
 
 #define LOG_TAG                         "pbserial" // 日志名字
 #define BUFFER_FIFO_SIZE                2048    // 缓存暂时没有收全的protobuf数据包
+#define BACKTRACE_SIZE                  100
 
 static int debug = 0;                           // 调试开关
 static int m_fd = -1;                           // 串口套接字
@@ -178,6 +180,7 @@ static void uninstall_protoid(int fd)
 
 	while (unlikely(proto != NULL)) {
 		if(proto->deinit) proto->deinit(fd);
+		proto = proto->next;
 	}
 }
 
@@ -197,6 +200,32 @@ static void handle_INT(int signum)
 }
 
 /**************************************************************************************
+ * * FunctionName   : pb_backtrace()
+ * * Description    : 堆栈回溯
+ * * EntryParameter : None
+ * * ReturnValue    : None
+ * ************************************************************************************/
+static void pb_backtrace(int signum)
+{
+	int j, nptrs;
+	char **strings;
+	void *buffer[BACKTRACE_SIZE];
+
+	printf("Ooops(%d): \n",signum);
+	syslog(LOG_ERR,"Ooops(%d): \n", signum);
+	nptrs = backtrace(buffer, BACKTRACE_SIZE);
+	strings = backtrace_symbols(buffer, nptrs);
+	if (strings != NULL) {
+		for (j = 0; j < nptrs; j++) {
+			printf("  [%02d] %s\n", j, strings[j]);
+			syslog(LOG_ERR,"  [%02d] %s\n", j, strings[j]);
+		}
+		free(strings);
+	}
+	exit(1);
+}
+
+/**************************************************************************************
  * * FunctionName   : setup_signals()
  * * Description    : 初始化信号
  * * EntryParameter : None
@@ -206,11 +235,20 @@ static void setup_signals()
 {
 	struct sigaction sa;
 															    
-	sa.sa_handler = handle_INT;
 	sa.sa_flags = 0;
-
+	sa.sa_handler = handle_INT;
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGQUIT, &sa, NULL);
+
+	sa.sa_flags = 0;
+	sa.sa_handler = pb_backtrace;
+	sigaction(SIGBUS, &sa, NULL);
+	sigaction(SIGABRT, &sa, NULL);
+	sigaction(SIGSEGV, &sa, NULL);
+
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGFPE, &sa, NULL);
 }
 
 /**************************************************************************************
@@ -225,6 +263,7 @@ static void setup_protoid(int fd)
 
 	while (unlikely(proto != NULL)) {
 		if(proto->init) proto->init(fd);
+		proto = proto->next;
 	}
 }
 

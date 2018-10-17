@@ -69,6 +69,7 @@ static int get_gpsinfo(av2hp_gpsInfo *info, char *data, int len)
 	for (i = 0; i < 12; i++){
 		if (gps.gsa.sats[i] > 0) info->m_satNum++;
 	}
+
 	return 0;
 }
 
@@ -163,7 +164,7 @@ static int handle_emaps_data(ProtobufCBinaryData *data, int n_data)
 	Gps *gps = NULL;
 	av2hp_gpsInfo gpsinfo = {0};
 
-	for (i=0; i<n_data; i++) {
+	for (i = 0; i < n_data; i++) {
 		gps = gps__unpack(NULL, data[i].len, data[i].data);
 		if(unlikely(gps == NULL || gps->nmea.data == NULL)) continue;
 
@@ -234,8 +235,10 @@ static int emaps_init(int fd)
  * **************************************************************************************/
 static int emaps_deinit(int fd)
 {
+	if(transport_fd >= 0) {
+		Av2HP_destory();
+	}
 	transport_fd = -1;
-	Av2HP_destory();
 	return  0;
 }
 
