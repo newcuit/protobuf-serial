@@ -17,7 +17,7 @@
 #define BUFFER_FIFO_SIZE                2048    // 缓存暂时没有收全的protobuf数据包
 #define BACKTRACE_SIZE                  100
 
-static int debug = 0;                           // 调试开关
+int _debug = 0;                           // 调试开关
 static int m_fd = -1;                           // 串口套接字
 static struct id_proto *id_list = NULL;         // 指向所有id列表
 
@@ -54,6 +54,8 @@ int id_register(struct id_proto *id)
 		while (i->next != NULL) i = i->next;
 		i->next = id;
 	}
+	DEBUG("%d registered\n", id)
+
 	return 0;
 }
 
@@ -76,6 +78,7 @@ static int iddata_send(int fd, uint8_t id, char *data, int len)
 		// 对应ID处理数据
 		return proto->handler(fd, data, len);
 	}
+	DEBUG("%d not registered\n", id)
 	return -1;
 }
 
@@ -123,6 +126,7 @@ static int do_packages(int fd, char *data, int len)
 
 		// 数据校验可靠性检测， 错误就重新尝试
 		if(tdata->csum == chksum_xor((uint8_t *)tdata->data, length)) {
+			DEBUG("recv %d length:%d\n", id, length)
 			iddata_send(fd, id, tdata->data, length);
 		} else {
 			syslog(LOG_ERR,"recv data(%d) chksum fail !!!\n", id, length);
@@ -163,6 +167,7 @@ int packages_send(int fd, uint8_t id, char *data, int len)
 	tdata->csum = chksum_xor((uint8_t *)tdata->data, len);
 	// 3.发送数据到串口
 	serial_write(fd, (char *)tdata, tdata_len);
+	DEBUG("%d data send length:%d\n", id, len)
 
 	free(tdata);
 	return len;
@@ -179,6 +184,7 @@ static void uninstall_protoid(int fd)
 	struct id_proto *proto = id_list;
 
 	while (unlikely(proto != NULL)) {
+		DEBUG("id(%d) do exit\n", proto->id)
 		if(proto->deinit) proto->deinit(fd);
 		proto = proto->next;
 	}
@@ -262,6 +268,7 @@ static void setup_protoid(int fd)
 	struct id_proto *proto = id_list;
 
 	while (unlikely(proto != NULL)) {
+		DEBUG("id(%d) do init\n", proto->id)
 		if(proto->init) proto->init(fd);
 		proto = proto->next;
 	}
@@ -303,7 +310,7 @@ int main(int argc, char *argv[])
 				device = optarg;
 				break;
 			case 'v':
-				debug = 1;
+				_debug = 1;
 				break;
 			case 'D':
 				daemonize = 1;
@@ -340,7 +347,10 @@ int main(int argc, char *argv[])
 
 	// 6.初始化串口
 	fd = device_init(device, baud);
-	if (fd < 0) return -1;
+	if (fd < 0) {
+		DEBUG("device(%s) init failed\n", device)
+		return -1;
+	}
 
 	// 7.初始化各ID
 	setup_protoid(fd);

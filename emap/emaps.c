@@ -96,6 +96,9 @@ static int emaps_can_send(int canid, char *data, int len)
 	message.data.len = len;
 	message.data.data = data;
 
+	DEBUG("CAN send %08X#%02X%02X%02X%02X%02X%02X%02X%02X\n",
+			canid, data[0],data[1],data[2],data[3],data[4],data[5],
+			data[6],data[7]);
 	// 3.打包子ID
 	msg.subdata->len = can__get_packed_size(&message);
 	msg.subdata->data = (uint8_t *)oob;
@@ -127,6 +130,7 @@ static int emaps_callback(const char *message, int *n)
 
 	for(i = 0; i < *n; i++) {
 		type = Av2HP_getMsgType(p->m_buffer, 8);
+		DEBUG("AV2 MSG TYPE:%d\n", type);
 		switch(type) {
 		case AV2_MSG_TYPE_POSITION:
 			emaps_can_send(0x18F0F69F, p->m_buffer, 8);
@@ -135,7 +139,6 @@ static int emaps_callback(const char *message, int *n)
 			break;
 		case AV2_MSG_TYPE_STUB:
 			emaps_can_send(0x18F0F69F, p->m_buffer, 8);
-			//syslog(LOG_ERR,"%d\n", Av2HP_getReconstFlag(p->m_buffer, 8));
 			break;
 		case AV2_MSG_TYPE_PROFILE_SHORT:
 			emaps_can_send(0x18F0F69F, p->m_buffer, 8);
@@ -168,6 +171,7 @@ static int handle_emaps_data(ProtobufCBinaryData *data, int n_data)
 		gps = gps__unpack(NULL, data[i].len, data[i].data);
 		if(unlikely(gps == NULL || gps->nmea.data == NULL)) continue;
 
+		DEBUG("GPS(%d):%s\n",gps->nmea.len,gps->nmea.data);
 		get_gpsinfo(&gpsinfo, gps->nmea.data, gps->nmea.len);
 		Av2HP_setGpsInfo(&gpsinfo);
 		gps__free_unpacked(gps, NULL);

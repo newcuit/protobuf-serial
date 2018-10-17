@@ -10,6 +10,7 @@
  * **************************************************************************************/
 static int handle_suspend_data(int fd)
 {
+	DEBUG("Suspend device\n");
 	return 0;
 }
 

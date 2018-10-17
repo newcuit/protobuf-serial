@@ -71,6 +71,8 @@ static int handle_ant_data(int fd)
 	ant.ant_m = vadc_get(adcm_path);
 	// 3.获取A 负天线数据
 	ant.ant_a = vadc_get(adca_path);
+
+	DEBUG("Sample ant a:%s ant m:%s\n", ant.ant_a, ant.ant_m)
 	msg.subdata->len = ant__get_packed_size(&ant);
 	msg.subdata->data = (uint8_t *)oob;
 

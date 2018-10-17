@@ -84,6 +84,8 @@ static int read_antchg_data(int fd)
 
 	// 2.获取天线切换脚数据
 	ant.chg = gpio_get(chg_path);
+
+	DEBUG("Get ant change:%d\n", ant.chg);
 	msg.subdata->len = ant_chg__get_packed_size(&ant);
 	msg.subdata->data = (uint8_t *)oob;
 
@@ -111,6 +113,7 @@ static int write_antchg_data(ProtobufCBinaryData *data, int n_data)
 		if(unlikely(ant == NULL)) continue;
 
 		// 切换天线
+		DEBUG("change ant:%d\n", !!ant->chg);
 		gpio_set(chg_path, !!ant->chg);
 		ant_chg__free_unpacked(ant, NULL);
 	}

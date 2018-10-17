@@ -337,4 +337,7 @@ static void  __attribute__((constructor)) __reg_proto_##ID(void) \
 	id_register(&id_##ID##_##HANDLER); \
 }
 
+extern int _debug;
+#define DEBUG(x...) if(_debug) printf(x);
+
 #endif /* _PBSERIAL_H__ */
