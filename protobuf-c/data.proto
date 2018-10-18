@@ -32,3 +32,18 @@ message Can {
 	required uint32 id = 1;
 	required bytes data = 2;
 }
+
+// audio 编码
+enum FORMAT {
+	NONE = 0;
+	RAW = 1;
+	ADPCM = 2;
+	G726 = 3;
+	G711U = 4;
+}
+
+// audio struct
+message Audio {
+	required uint32 format = 1;
+	optional bytes wav = 2;
+}

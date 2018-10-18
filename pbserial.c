@@ -167,7 +167,7 @@ int packages_send(int fd, uint8_t id, char *data, int len)
 	tdata->csum = chksum_xor((uint8_t *)tdata->data, len);
 	// 3.发送数据到串口
 	serial_write(fd, (char *)tdata, tdata_len);
-	DEBUG("%d data send length:%d\n", id, len)
+	DEBUG("ID%d send data length:%d\n", id, len)
 
 	free(tdata);
 	return len;
