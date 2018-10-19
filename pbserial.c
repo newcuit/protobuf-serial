@@ -126,7 +126,7 @@ static int do_packages(int fd, char *data, int len)
 
 		// 数据校验可靠性检测， 错误就重新尝试
 		if(tdata->csum == chksum_xor((uint8_t *)tdata->data, length)) {
-			DEBUG("recv %d length:%d\n", id, length)
+			//DEBUG("recv %d length:%d\n", id, length)
 			iddata_send(fd, id, (char *)tdata->data, length);
 		} else {
 			syslog(LOG_ERR,"recv data(%d) chksum fail !!!\n", id, length);
@@ -167,7 +167,7 @@ int packages_send(int fd, uint8_t id, char *data, int len)
 	tdata->csum = chksum_xor((uint8_t *)tdata->data, len);
 	// 3.发送数据到串口
 	serial_write(fd, (char *)tdata, tdata_len);
-	DEBUG("ID%d send data length:%d\n", id, len)
+	//DEBUG("ID%d send data length:%d\n", id, len)
 
 	free(tdata);
 	return len;
@@ -184,7 +184,7 @@ static void uninstall_protoid(int fd)
 	struct id_proto *proto = id_list;
 
 	while (unlikely(proto != NULL)) {
-		DEBUG("id(%d) do exit\n", proto->id)
+		//DEBUG("id(%d) do exit\n", proto->id)
 		if(proto->deinit) proto->deinit(fd);
 		proto = proto->next;
 	}
@@ -266,7 +266,7 @@ static void setup_protoid(int fd)
 	struct id_proto *proto = id_list;
 
 	while (unlikely(proto != NULL)) {
-		DEBUG("id(%d) do init\n", proto->id)
+		//DEBUG("id(%d) do init\n", proto->id)
 		if(proto->init) proto->init(fd);
 		proto = proto->next;
 	}

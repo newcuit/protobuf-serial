@@ -17,7 +17,8 @@ CPPFLAGS += -I$(SDK_PATH)/lib/interface/inc           \
 
 LD_FLAGS += -Wl,--no-as-needed -std=c++11 -L./lib 
 LD_FLAGS += -ladasisHP -lpthread -lm -lstdc++
-LD_FLAGS += -lql_lib_audio -llog -L$(SDK_PATH)/lib -lrt
+LD_FLAGS += -lql_lib_audio -llog -L$(SDK_PATH)/lib -lrt 
+LD_FLAGS += $(SDK_PATH)/lib/libql_common_api.a
 
 SRC_FILES = ${wildcard *.c}
 EMAP_FILES = ${wildcard $(EMAP_DIR)/*.c}

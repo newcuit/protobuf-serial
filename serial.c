@@ -142,7 +142,7 @@ int device_deinit(int fd)
 
 	if(unlikely(fd <= 0)) return 0;
 
-	tcgetattr(fd, &ios);
-	tcsetattr(fd, TCSAFLUSH, &ios);
+	//tcgetattr(fd, &ios);
+	//tcsetattr(fd, TCSANOW, &ios);
 	close(fd);
 }
