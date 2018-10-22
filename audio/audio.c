@@ -15,6 +15,7 @@
 **************************************************************************************/
 #define MAX_AUDIO_SIZE                  200
 #define MAX_CONTEXT_SIZE                100
+#define MIN_TRANSFER_SIZE               8000
 
 /**************************************************************************************
 * Description    : 定义语音音频数据块结构
@@ -46,6 +47,9 @@ static struct audio {
 		int format;                           // 录音上次格式
 		int running;                          // 录音状态
 		char *buffer;                         // 录音数据缓冲区
+		char *voice_buffer;                   // 录音发送数据缓存区
+		int voice_buf_len;                    // 录音发送缓冲区数据长度
+		int voice_min_size;                   // 录音发送阈值, 超过则上报给mpu
 		pthread_t tid;                        // 录音pcm线程
 		pthread_cond_t cond;                  // 录音线程条件
 		pthread_mutex_t mutex;                // 录音线程锁
@@ -166,6 +170,7 @@ static void *record_thread(void *arg)
 	int bufsize = 0;
 	struct audio *ad = (struct audio *)arg;
 
+	ad->record.voice_buf_len = 0;
 	while (likely(ad->inited)) {
 		// 1.加锁
 		pthread_mutex_lock(&ad->record.mutex);
@@ -179,12 +184,19 @@ static void *record_thread(void *arg)
 		}
 		// 3. 获取录音
 		bufsize = ql_voice_record_read(ad->record.buffer);
-		//DEBUG("record size:%d\n",bufsize);
 
-		// 4.上报录音
-		send_audio_data(ad, ad->record.buffer, bufsize);
+		// 4.将数据存放到发送缓冲区
+		memcpy(ad->record.voice_buffer + ad->record.voice_buf_len, 
+				ad->record.buffer, bufsize);
+		ad->record.voice_buf_len += bufsize;
 
-		// 5.解锁
+		// 5.满足条件，上报录音
+		if(unlikely(ad->record.voice_buf_len >= ad->record.voice_min_size)) {
+			send_audio_data(ad, ad->record.voice_buffer, ad->record.voice_buf_len);
+			ad->record.voice_buf_len = 0;
+		}
+
+		// 6.解锁
 		pthread_mutex_unlock(&ad->record.mutex);
 	}
 }
@@ -395,9 +407,14 @@ static int audio_init(int fd)
 	}
 
 	// 2.初始化record
+	sound.record.voice_buffer = (char *)malloc(MIN_TRANSFER_SIZE * 2);
+	if(unlikely(sound.record.voice_buffer == NULL)) {
+		goto destory_record;
+	}
+	sound.record.voice_min_size = MIN_TRANSFER_SIZE;
 	if(pthread_create(&sound.record.tid, NULL, record_thread, (void *)&sound) != 0) {
 		DEBUG("audio create thread failed\n");
-		goto destory_record;
+		goto destory_record1;
 	}
 	sound.record.running = 0;
 	sound.record.buffer = NULL;
@@ -407,6 +424,8 @@ static int audio_init(int fd)
 	DEBUG("audio thread running\n");
 
 	return 0;
+destory_record1:
+	free(sound.record.voice_buffer);
 destory_record:
 	Ql_AudPlayer_Stop(sound.voice.fd);
 	Ql_AudPlayer_Close(sound.voice.fd);
@@ -447,6 +466,7 @@ static int audio_deinit(int fd)
 	pthread_join(sound.record.tid, &ret);
 	pthread_mutex_destroy(&sound.record.mutex);
 	pthread_cond_destroy(&sound.record.cond);
+	free(sound.record.voice_buffer);
 
 	if(likely(!sound.record.running)) {
 		goto exit_done;

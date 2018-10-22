@@ -29,7 +29,6 @@ int serial_write(int fd, const char *msg, size_t n)
 		len = strlen(msg);
 	else
 		len = n;
-
 	// 2.直到写完所有数据
 	do {
 		ret = write(fd, msg + written, len - written);
@@ -114,9 +113,22 @@ int device_init(const char *device, int baud)
 		cfsetispeed(&ios,B115200);
 		cfsetospeed(&ios,B115200);
 		break;
+	case 460800:
+		cfsetispeed(&ios,B460800);
+		cfsetospeed(&ios,B460800);
+		break;
+	case 500000:
+		cfsetispeed(&ios,B500000);
+		cfsetospeed(&ios,B500000);
+		break;
+	case 921600:
+		cfsetispeed(&ios,B921600);
+		cfsetospeed(&ios,B921600);
+		break;
 	defalut:
 		syslog(LOG_ERR, "%s error baud %d", device, baud);
 	}
+	DEBUG("use baud %d\n", baud);
 
 	ios.c_cc[VTIME] = 0;
 	ios.c_cc[VMIN] = 0;
