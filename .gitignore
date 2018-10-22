@@ -1,0 +1,4 @@
+*.o
+pbserial
+protobuf-c/data.pb-c.c
+protobuf-c/data.pb-c.h
