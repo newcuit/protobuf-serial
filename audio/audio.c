@@ -99,7 +99,7 @@ static inline int insert_audio_block(struct audio *ad, int format, char *data, i
 
 	inode->format = format;
 	if(likely(data && len > 0)) {
-		inode->wav.data = strndup(data, len);
+		inode->wav.data = memdup(data, len);
 		inode->wav.len = len;
 	} else {
 		inode->wav.data = NULL;

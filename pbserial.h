@@ -307,6 +307,20 @@ static inline int8_t unpack_le64(const uint64_t src, uint64_t *dst)
 }
 
 /**************************************************************************************
+ * * FunctionName   : memdup()
+ * * Description    : 类似于strdup,内存拷贝
+ * * EntryParameter : src, 拷贝的内存数据， len，拷贝的内存数据长度
+ * * ReturnValue    : 返回复制后的新内存地址
+ * **************************************************************************************/
+#define memdup(src, len)  ({         \
+	void *p = malloc(len);       \
+	if(p != NULL) {              \
+		memcpy(p, src, len);     \
+	}                            \
+	(void *)p;                   \
+})
+
+/**************************************************************************************
  * * FunctionName   : id_register()
  * * Description    : 注册通信数据ID
  * * EntryParameter : id,指向id相关数据信息

@@ -14,7 +14,7 @@
 #include "pbserial.h"
 
 #define LOG_TAG                         "pbserial" // 日志名字
-#define BUFFER_FIFO_SIZE                2048    // 缓存暂时没有收全的protobuf数据包
+#define BUFFER_FIFO_SIZE                (2048*6)    // 缓存暂时没有收全的protobuf数据包
 #define BACKTRACE_SIZE                  100
 
 int _debug = 0;                           // 调试开关
