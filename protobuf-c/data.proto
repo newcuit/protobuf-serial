@@ -33,17 +33,14 @@ message Can {
 	required bytes data = 2;
 }
 
-// audio 编码
-enum FORMAT {
+enum CODEC {
 	NONE = 0;
-	RAW = 1;
-	ADPCM = 2;
-	G726 = 3;
-	G711U = 4;
+	SPEEX = 1;
+	RAW = 2;
 }
 
 // audio struct
 message Audio {
-	required uint32 format = 1;
-	optional bytes wav = 2;
+	optional bytes data = 2;
+	required uint32 record = 1;
 }
